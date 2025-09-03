@@ -10,7 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid } from "recharts"
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-type Stats = Awaited<ReturnType<typeof getDashboardStats>> & { error?: string };
+type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
 
 const chartConfig = {
   usage: {
@@ -41,7 +41,7 @@ export default function DashboardPage() {
         {isLoading ? <Skeleton className="h-8 w-1/2" /> : <div className="text-2xl font-bold">{value}</div>}
       </CardContent>
     </Card>
-  )
+  );
 
   if (stats?.error) {
     return (
@@ -94,7 +94,7 @@ export default function DashboardPage() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Cpu className="h-5 w-5"/> Host Info</CardTitle>
-            </CardHeader>
+            </Header>
             <CardContent className="space-y-4">
                  {stats ? (
                     <>
