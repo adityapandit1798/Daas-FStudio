@@ -133,7 +133,7 @@ export function ConnectForm() {
                     <FormItem>
                       <FormLabel>TLS Certificate (.pem)</FormLabel>
                       <FormControl>
-                        <Input type="file" {...field} disabled={isLoading} />
+                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,7 +146,7 @@ export function ConnectForm() {
                     <FormItem>
                       <FormLabel>TLS Key (.pem)</FormLabel>
                       <FormControl>
-                        <Input type="file" {...field} disabled={isLoading} />
+                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -159,7 +159,7 @@ export function ConnectForm() {
                     <FormItem>
                       <FormLabel>CA Certificate (.pem)</FormLabel>
                       <FormControl>
-                        <Input type="file" {...field} disabled={isLoading} />
+                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

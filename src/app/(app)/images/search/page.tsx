@@ -55,7 +55,7 @@ export default function ImageSearchPage() {
       <div className="flex gap-2 mb-6">
         <Input 
             placeholder="e.g., redis, node, postgres..." 
-            value={searchTerm} 
+            value={searchTerm || ''} 
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             className="max-w-sm"

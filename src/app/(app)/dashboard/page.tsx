@@ -51,7 +51,7 @@ export default function DashboardPage() {
         <StatCard title="Stopped" value={stats?.stoppedContainers ?? 0} icon={Ship} isLoading={!stats} />
         <StatCard title="Total Images" value={stats?.totalImages ?? 0} icon={Server} isLoading={!stats} />
         <StatCard title="Total Networks" value={stats?.totalNetworks ?? 0} icon={Network} isLoading={!stats} />
-        <Stat_Card title="Total Volumes" value={stats?.totalVolumes ?? 0} icon={Database} isLoading={!stats} />
+        <StatCard title="Total Volumes" value={stats?.totalVolumes ?? 0} icon={Database} isLoading={!stats} />
       </div>
       <div className="grid gap-4 mt-6 md:grid-cols-2">
         <Card>
