@@ -86,7 +86,7 @@ export default function DashboardPage() {
                 <CardTitle className="flex items-center gap-2"><BarChart className="h-5 w-5"/> Resource Usage</CardTitle>
             </CardHeader>
             <CardContent>
-                {stats ? (
+                {stats && !isError ? (
                     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
                         <RechartsBarChart data={chartData} accessibilityLayer>
                             <CartesianGrid vertical={false} />
@@ -104,12 +104,12 @@ export default function DashboardPage() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Cpu className="h-5 w-5"/> Host Info</CardTitle>
-            </Header>
+            </CardHeader>
             <CardContent className="space-y-4">
-                 {stats ? (
+                 {stats && !isError ? (
                     <>
                         <div className="text-sm space-y-2">
-                            <div className="flex justify-between"><span>Docker Version:</span> <span className="font-mono">{stats.Swarm?.DockerRootDir ? 'Unknown' : 'N/A'}</span></div>
+                            <div className="flex justify-between"><span>Docker Version:</span> <span className="font-mono">{stats.ServerVersion}</span></div>
                             <div className="flex justify-between"><span>Operating System:</span> <span className="font-mono">{stats.OperatingSystem}</span></div>
                             <div className="flex justify-between"><span>Architecture:</span> <span className="font-mono">{stats.Architecture}</span></div>
                             <div className="flex justify-between"><span>CPUs:</span> <span className="font-mono">{stats.NCPU}</span></div>
