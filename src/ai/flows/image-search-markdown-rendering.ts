@@ -35,7 +35,7 @@ const prompt = ai.definePrompt({
 
   Convert the following markdown to HTML:
 
-  {{markdown}}`,
+  {{{markdown}}}`,
 });
 
 const renderMarkdownDescriptionFlow = ai.defineFlow(
