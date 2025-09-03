@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/dockerhub/:path*',
+        destination: 'https://hub.docker.com/v2/:path*',
+      },
+    ]
+  },
 };
 
 export default nextConfig;

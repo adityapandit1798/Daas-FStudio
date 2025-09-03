@@ -1,14 +1,11 @@
-import Docker from 'dockerode';
+import Docker, { DockerOptions } from 'dockerode';
 import { cookies } from 'next/headers';
 import { DockerConnection } from '@/contexts/DockerContext';
+import fs from 'fs';
 
 let dockerode: Docker | null = null;
 
 export function getDockerode(): Docker {
-    if (dockerode) {
-        return dockerode;
-    }
-
     const cookieStore = cookies();
     const connectionCookie = cookieStore.get('dockerConnection');
 
@@ -20,12 +17,21 @@ export function getDockerode(): Docker {
 
     const [host, port] = connection.host.split(':');
 
-    dockerode = new Docker({
+    const dockerOptions: DockerOptions = {
         host: host,
         port: port || (connection.protocol === 'https' ? 2376 : 2375),
         protocol: connection.protocol,
-        // Add logic for certs if needed
-    });
+    };
 
-    return dockerode;
+    if (connection.protocol === 'https' && connection.ca && connection.cert && connection.key) {
+        dockerOptions.ca = connection.ca;
+        dockerOptions.cert = connection.cert;
+        dockerOptions.key = connection.key;
+    }
+
+    // This is a new instance per request, which is correct for server components
+    // as each request has its own cookie context.
+    const newDockerode = new Docker(dockerOptions);
+
+    return newDockerode;
 }

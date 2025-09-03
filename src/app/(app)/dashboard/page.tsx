@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { getDashboardStats } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/PageHeader';
-import { BarChart, Cpu, Server, Ship, Network, Database } from 'lucide-react';
+import { BarChart, Cpu, Server, Ship, Network, Database, AlertCircle } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "@/components/ui/chart"
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid } from "recharts"
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
+type Stats = Awaited<ReturnType<typeof getDashboardStats>> & { error?: string };
 
 const chartConfig = {
   usage: {
@@ -41,6 +42,22 @@ export default function DashboardPage() {
       </CardContent>
     </Card>
   )
+
+  if (stats?.error) {
+    return (
+        <div>
+            <PageHeader title="Dashboard" description="Overview of your Docker environment." />
+            <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Connection Error</AlertTitle>
+                <AlertDescription>
+                    <p>Could not connect to the Docker host. Please check your connection details and try again.</p>
+                    <p className="font-mono text-xs mt-2 bg-destructive/20 p-2 rounded-md">{stats.error}</p>
+                </AlertDescription>
+            </Alert>
+        </div>
+    )
+  }
 
   return (
     <div>
@@ -80,14 +97,43 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-4">
                  {stats ? (
-                    <div className="text-sm space-y-2">
-                        <div className="flex justify-between"><span>CPU Usage:</span> <span className="font-mono">{stats.cpuUsage.toFixed(2)}%</span></div>
-                        <div className="flex justify-between"><span>Memory Usage:</span> <span className="font-mono">{(stats.memoryUsage / 100 * stats.memoryLimit).toFixed(2)} GB / {stats.memoryLimit} GB</span></div>
-                    </div>
+                    <>
+                        <div className="text-sm space-y-2">
+                            <div className="flex justify-between"><span>Docker Version:</span> <span className="font-mono">{stats.Swarm?.DockerRootDir ? 'Unknown' : 'N/A'}</span></div>
+                            <div className="flex justify-between"><span>Operating System:</span> <span className="font-mono">{stats.OperatingSystem}</span></div>
+                            <div className="flex justify-between"><span>Architecture:</span> <span className="font-mono">{stats.Architecture}</span></div>
+                            <div className="flex justify-between"><span>CPUs:</span> <span className="font-mono">{stats.NCPU}</span></div>
+                            <div className="flex justify-between"><span>Total Memory:</span> <span className="font-mono">{stats.memoryLimit.toFixed(2)} GB</span></div>
+                        </div>
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardDescription>CPU Usage</CardDescription>
+                                <CardTitle className="text-4xl">{stats.cpuUsage.toFixed(2)}%</CardTitle>
+                            </Header>
+                            <CardContent>
+                                <div className="text-xs text-muted-foreground">
+                                Based on running containers vs available CPUs
+                                </div>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader className="pb-2">
+                                <CardDescription>Memory Usage</CardDescription>
+                                <CardTitle className="text-4xl">{stats.memoryUsage.toFixed(2)}%</CardTitle>
+                            </Header>
+                            <CardContent>
+                                <div className="text-xs text-muted-foreground">
+                                {((stats.memoryLimit * (stats.memoryUsage / 100))).toFixed(2)} GB of {stats.memoryLimit.toFixed(2)} GB used
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </>
                 ) : (
                     <div className="space-y-2">
                         <Skeleton className="h-6 w-full" />
                         <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-24 w-full" />
+                        <Skeleton className="h-24 w-full" />
                     </div>
                 )}
             </CardContent>

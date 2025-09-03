@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,14 +22,14 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDocker } from '@/contexts/DockerContext';
 import { useToast } from '@/hooks/use-toast';
+import { Textarea } from './ui/textarea';
 
 const formSchema = z.object({
   host: z.string().min(1, { message: 'Host IP or domain is required.' }),
   protocol: z.enum(['http', 'https'], { required_error: 'You need to select a protocol.' }),
-  // In a real app, you'd handle file uploads
-  cert: z.any().optional(),
-  key: z.any().optional(),
-  ca: z.any().optional(),
+  ca: z.string().optional(),
+  cert: z.string().optional(),
+  key: z.string().optional(),
 });
 
 export function ConnectForm() {
@@ -49,19 +50,21 @@ export function ConnectForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Simulate connection
-    await new Promise(resolve => setTimeout(resolve, 1000));
     
     setConnection({
         host: values.host,
         protocol: values.protocol,
+        ca: values.ca,
+        cert: values.cert,
+        key: values.key
     });
     
     toast({
-        title: 'Connection Successful',
-        description: `Successfully connected to ${values.host}.`,
+        title: 'Connection Details Saved',
+        description: `Now attempting to connect to ${values.host}.`,
     });
 
+    // We don't know if the connection is successful until we try to load a page
     router.push('/dashboard');
     setIsLoading(false);
   }
@@ -114,9 +117,9 @@ export function ConnectForm() {
               name="host"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Docker Host IP / Domain</FormLabel>
+                  <FormLabel>Docker Host IP:Port</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., 192.168.1.100" {...field} disabled={isLoading} />
+                    <Input placeholder="e.g., 192.168.1.100:2375" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,16 +127,31 @@ export function ConnectForm() {
             />
 
             {protocol === 'https' && (
-              <div className="space-y-4 pt-2 border-t border-dashed">
-                <p className="text-sm text-muted-foreground pt-4">Upload TLS certificates for secure connection.</p>
+              <div className="space-y-4 pt-4 border-t border-dashed">
+                <p className="text-sm text-muted-foreground">
+                    Paste the content of your TLS certificates for a secure connection.
+                </p>
                 <FormField
+                  control={form.control}
+                  name="ca"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CA Certificate</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="-----BEGIN CERTIFICATE-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
                   control={form.control}
                   name="cert"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>TLS Certificate (.pem)</FormLabel>
+                      <FormLabel>Client Certificate</FormLabel>
                       <FormControl>
-                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
+                        <Textarea placeholder="-----BEGIN CERTIFICATE-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -144,22 +162,9 @@ export function ConnectForm() {
                   name="key"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>TLS Key (.pem)</FormLabel>
+                      <FormLabel>Client Key</FormLabel>
                       <FormControl>
-                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="ca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CA Certificate (.pem)</FormLabel>
-                      <FormControl>
-                        <Input type="file" {...field} value={field.value?.fileName} disabled={isLoading} />
+                         <Textarea placeholder="-----BEGIN RSA PRIVATE KEY-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
