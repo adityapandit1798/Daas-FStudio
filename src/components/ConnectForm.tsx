@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,7 +21,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDocker } from '@/contexts/DockerContext';
 import { useToast } from '@/hooks/use-toast';
-import { Textarea } from './ui/textarea';
 
 const formSchema = z.object({
   host: z.string().min(1, { message: 'Host IP or domain is required.' }),
@@ -31,6 +29,16 @@ const formSchema = z.object({
   cert: z.string().optional(),
   key: z.string().optional(),
 });
+
+const fileToDataURL = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsText(file);
+    });
+};
+
 
 export function ConnectForm() {
   const router = useRouter();
@@ -49,6 +57,7 @@ export function ConnectForm() {
   const protocol = form.watch('protocol');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log('ConnectForm: onSubmit called with values:', values);
     setIsLoading(true);
     
     setConnection({
@@ -64,9 +73,17 @@ export function ConnectForm() {
         description: `Now attempting to connect to ${values.host}.`,
     });
 
-    // We don't know if the connection is successful until we try to load a page
+    console.log('ConnectForm: redirecting to /dashboard');
     router.push('/dashboard');
     setIsLoading(false);
+  }
+
+  const handleFileChange = (field: any) => async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+        const file = event.target.files[0];
+        const content = await fileToDataURL(file);
+        field.onChange(content);
+    }
   }
 
   return (
@@ -129,46 +146,46 @@ export function ConnectForm() {
             {protocol === 'https' && (
               <div className="space-y-4 pt-4 border-t border-dashed">
                 <p className="text-sm text-muted-foreground">
-                    Paste the content of your TLS certificates for a secure connection.
+                    Upload your TLS certificates for a secure connection.
                 </p>
                 <FormField
-                  control={form.control}
-                  name="ca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>CA Certificate</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="-----BEGIN CERTIFICATE-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                    control={form.control}
+                    name="ca"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>CA Certificate (.pem)</FormLabel>
+                            <FormControl>
+                                <Input type="file" accept=".pem" onChange={handleFileChange(field)} disabled={isLoading} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
                  <FormField
-                  control={form.control}
-                  name="cert"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client Certificate</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="-----BEGIN CERTIFICATE-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                    control={form.control}
+                    name="cert"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Client Certificate (.pem)</FormLabel>
+                            <FormControl>
+                                <Input type="file" accept=".pem" onChange={handleFileChange(field)} disabled={isLoading} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
                  <FormField
-                  control={form.control}
-                  name="key"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client Key</FormLabel>
-                      <FormControl>
-                         <Textarea placeholder="-----BEGIN RSA PRIVATE KEY-----..." {...field} disabled={isLoading} rows={3} className="font-code" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                    control={form.control}
+                    name="key"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Client Key (.pem)</FormLabel>
+                            <FormControl>
+                                <Input type="file" accept=".pem" onChange={handleFileChange(field)} disabled={isLoading} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
                 />
               </div>
             )}

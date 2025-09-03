@@ -10,7 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from "
 import { Bar, BarChart as RechartsBarChart, XAxis, YAxis, CartesianGrid } from "recharts"
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-type Stats = Awaited<ReturnType<typeof getDashboardStats>>;
+type Stats = Awaited<ReturnType<typeof getDashboardStats>> | { error: string };
 
 const chartConfig = {
   usage: {
@@ -21,12 +21,20 @@ const chartConfig = {
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
+  console.log('DashboardPage: component rendered');
 
   useEffect(() => {
-    getDashboardStats().then(setStats);
+    console.log('DashboardPage: useEffect triggered');
+    getDashboardStats().then(data => {
+        console.log('DashboardPage: stats received', data);
+        setStats(data);
+    });
   }, []);
 
-  const chartData = stats ? [
+  const isLoading = !stats;
+  const isError = stats && 'error' in stats && stats.error;
+  
+  const chartData = stats && !isError ? [
       { resource: 'CPU', usage: stats.cpuUsage },
       { resource: 'Memory', usage: stats.memoryUsage },
     ] : [];
@@ -43,7 +51,8 @@ export default function DashboardPage() {
     </Card>
   );
 
-  if (stats?.error) {
+  if (isError) {
+    console.error('DashboardPage: rendering error state', stats.error);
     return (
         <div>
             <PageHeader title="Dashboard" description="Overview of your Docker environment." />
@@ -59,16 +68,17 @@ export default function DashboardPage() {
     )
   }
 
+  console.log('DashboardPage: rendering dashboard content');
   return (
     <div>
       <PageHeader title="Dashboard" description="Overview of your Docker environment." />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatCard title="Total Containers" value={stats?.totalContainers ?? 0} icon={Ship} isLoading={!stats} />
-        <StatCard title="Running" value={stats?.runningContainers ?? 0} icon={Ship} isLoading={!stats} />
-        <StatCard title="Stopped" value={stats?.stoppedContainers ?? 0} icon={Ship} isLoading={!stats} />
-        <StatCard title="Total Images" value={stats?.totalImages ?? 0} icon={Server} isLoading={!stats} />
-        <StatCard title="Total Networks" value={stats?.totalNetworks ?? 0} icon={Network} isLoading={!stats} />
-        <StatCard title="Total Volumes" value={stats?.totalVolumes ?? 0} icon={Database} isLoading={!stats} />
+        <StatCard title="Total Containers" value={stats?.totalContainers ?? 0} icon={Ship} isLoading={isLoading} />
+        <StatCard title="Running" value={stats?.runningContainers ?? 0} icon={Ship} isLoading={isLoading} />
+        <StatCard title="Stopped" value={stats?.stoppedContainers ?? 0} icon={Ship} isLoading={isLoading} />
+        <StatCard title="Total Images" value={stats?.totalImages ?? 0} icon={Server} isLoading={isLoading} />
+        <StatCard title="Total Networks" value={stats?.totalNetworks ?? 0} icon={Network} isLoading={isLoading} />
+        <StatCard title="Total Volumes" value={stats?.totalVolumes ?? 0} icon={Database} isLoading={isLoading} />
       </div>
       <div className="grid gap-4 mt-6 md:grid-cols-2">
         <Card>
